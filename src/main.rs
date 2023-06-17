@@ -1,7 +1,11 @@
 const BOARD_SIZE:[usize;2] = [10,10];
-use std::io;
 use rand::Rng;
-fn main() {
+use std::io::{self, stdout};
+use crossterm::event::{self, Event, KeyCode, KeyEvent};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+
+
+fn main() -> Result<(), Box<dyn std::error::Error>>  {
     //Snake in rust in the command line
 
     //Config:
@@ -12,7 +16,7 @@ fn main() {
     let food_char = "X";
     let empty_char = " ";
     let wall_collision_enabled = true; //If false, the snake will wrap around if it hits a wall
-
+    
 
     /*so here is my idea.
     I represent the board as a 2d array of integers.
@@ -25,14 +29,96 @@ fn main() {
 
     The drawing function can then easily turn that into a string, and print it.
     */
+    enable_raw_mode();
     let mut is_alive:bool=true;
     let mut board:[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]] = [[0;BOARD_SIZE[0]];BOARD_SIZE[1]];
     draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
-    let mut snake_pos:[usize;2] = [(int)(BOARD_SIZE[0]/2),(int)(BOARD_SIZE[1]/2)];
+    let mut snake_pos:[usize;2] = [board.len()/2 as usize, board[0].len()/2 as usize];
     let mut snake_dir:[i32;2] = [0,1];
     let mut snake_len:i32 = start_size;
     let mut food_pos:[usize;2] = [0,0];
+    let mut stdout = stdout();
     let mut rng = rand::thread_rng();
+    let mut score:i32 = 0;
+
+    let mut input = String::new();
+    food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
+    board[food_pos[0]][food_pos[1]] = -1;
+    while is_alive{
+        //Get input
+        let stdin = io::stdin();
+        draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
+        //wait
+        std::thread::sleep(std::time::Duration::from_millis(300));
+        if event::poll(std::time::Duration::from_millis(1))? {
+            if let Event::Key(key_event) = event::read()? {
+                match key_event.code {
+                    KeyCode::Char('q') => {
+                        is_alive = false;
+                        disable_raw_mode();
+                        break;
+                    },
+                    KeyCode::Left => {
+                        snake_dir = [0,-1];
+                    },
+                    KeyCode::Right => {
+                        snake_dir = [0,1];
+                    },
+                    KeyCode::Up => {
+                        snake_dir = [-1,0];
+                    },
+                    KeyCode::Down => {
+                        snake_dir = [1,0];
+                    },
+                    _ => {}
+                }
+            }
+        }
+        //Move snake
+        snake_pos[0] = (snake_pos[0] as i32 + snake_dir[0]) as usize;
+        snake_pos[1] = (snake_pos[1] as i32 + snake_dir[1]) as usize;
+        //Check for collisions
+        if board[snake_pos[0]][snake_pos[1]] > 0{
+            is_alive = false;
+        }
+        if wall_collision_enabled{
+            if snake_pos[0] >= board.len() || snake_pos[1] >= board[0].len(){
+                is_alive = false;
+                break;
+            }
+        }
+        else{
+            if snake_pos[0] >= board.len(){
+                snake_pos[0] = 0;
+            }
+            if snake_pos[1] >= board[0].len(){
+                snake_pos[1] = 0;
+            }
+            if snake_pos[0] < 0{
+                snake_pos[0] = board.len()-1;
+            }
+            if snake_pos[1] < 0{
+                snake_pos[1] = board[0].len()-1;
+            }
+        }
+        
+        //Check for food
+        if snake_pos==food_pos{
+            snake_len += 1;
+            score += 1;
+            food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
+        }
+        //Update board
+        for row in board.iter_mut(){
+            for block in row.iter_mut(){
+                if *block > 0{
+                    *block -= 1;
+                }
+            }
+        }
+        board[snake_pos[0]][snake_pos[1]] = snake_len;
+        score +=1; 
+    }Ok(())
 
 }
 fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snake_char: &str, food_char: &str, empty_char: &str){
@@ -53,5 +139,5 @@ fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snak
         print!("{}", wall_char);
         println!();
     }
-    print!("{}", wall_char.repeat(board[0].len()+2));
+    println!("{}", wall_char.repeat(board[0].len()+2));
 }
