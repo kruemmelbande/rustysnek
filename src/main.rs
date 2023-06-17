@@ -1,5 +1,6 @@
 const BOARD_SIZE:[usize;2] = [10,10];
 use rand::Rng;
+use std::io::Write;
 use std::io::{self, stdout};
 use crossterm::event::{self, Event, KeyCode, KeyEvent};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
@@ -47,9 +48,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     while is_alive{
         //Get input
         let stdin = io::stdin();
+        
         draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
+        stdout.flush()?;
+        enable_raw_mode();
         //wait
-        std::thread::sleep(std::time::Duration::from_millis(300));
+        std::thread::sleep(std::time::Duration::from_millis(200));
         if event::poll(std::time::Duration::from_millis(1))? {
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
@@ -74,6 +78,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                 }
             }
         }
+        disable_raw_mode();
         //Move snake
         snake_pos[0] = (snake_pos[0] as i32 + snake_dir[0]) as usize;
         snake_pos[1] = (snake_pos[1] as i32 + snake_dir[1]) as usize;
@@ -107,6 +112,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             snake_len += 1;
             score += 1;
             food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
+            let mut i = 0;
+            while board[food_pos[0]][food_pos[1]] != 0{
+                if i > 10000{
+                    is_alive = false;
+                    println!("Youre win!");
+                    break;
+                }
+                food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
+            }
+            board[food_pos[0]][food_pos[1]] = -1;
         }
         //Update board
         for row in board.iter_mut(){
@@ -126,6 +141,7 @@ fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snak
     
 
     //Draw the top wall
+    clear_screen();
     println!("{}", wall_char.repeat(board[0].len()+2));
     for row in board.iter(){
         print!("{}", wall_char);
@@ -140,4 +156,8 @@ fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snak
         println!();
     }
     println!("{}", wall_char.repeat(board[0].len()+2));
+}
+
+fn clear_screen(){
+    print!("\x1B[2J\x1B[1;1H");
 }
