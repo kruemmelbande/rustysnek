@@ -12,10 +12,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     //Config:
 
     let start_size= 3;
-    let wall_char = "#";
-    let snake_char = "O";
-    let food_char = "X";
-    let empty_char = " ";
+    let wall_char = "##";
+    let snake_char = "[]";
+    let food_char = "()";
+    let empty_char = "  ";
     let wall_collision_enabled = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -41,15 +41,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let mut stdout = stdout();
     let mut rng = rand::thread_rng();
     let mut score:i32 = 0;
-
-    let mut input = String::new();
     food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
     board[food_pos[0]][food_pos[1]] = -1;
     while is_alive{
         //Get input
         let stdin = io::stdin();
-        
+        //clear events
+        /*while event::poll(std::time::Duration::from_millis(1))? {
+            if let Event::Key(_) = event::read()? {
+            }
+        }*/
         draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
+        print!("Score: {}", score);
         stdout.flush()?;
         enable_raw_mode();
         //wait
@@ -132,7 +135,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             }
         }
         board[snake_pos[0]][snake_pos[1]] = snake_len;
-        score +=1; 
+
     }Ok(())
 
 }
