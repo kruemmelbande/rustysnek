@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
 
     The drawing function can then easily turn that into a string, and print it.
     */
-    enable_raw_mode().ok();
+    
     let mut board:[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]] = [[0;BOARD_SIZE[0]];BOARD_SIZE[1]];
     draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
     let mut snake_pos:[i32;2] = [(board.len()/2) as i32, (board[0].len()/2) as i32];
