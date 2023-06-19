@@ -4,7 +4,7 @@ use std::io::{stdout};
 use crossterm::event::{self, Event, KeyCode};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
-const BOARD_SIZE:[usize;2] = [10,10];
+const BOARD_SIZE:[usize;2] = [15,15];
 fn main() -> Result<(), Box<dyn std::error::Error>>  {
     //Snake in rust in the command line
 
@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let head_char:&str = "<>";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
-    let time_between_frames:u64 = 100; //in ms
+    let time_between_frames:u64 = 150; //in ms
     let wall_collision_enabled:bool = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -66,16 +66,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                         break;
                     },
                     KeyCode::Left | KeyCode::Char('a')  => {
-                        snake_dir = [0,-1];
+                        if snake_dir!=[0,1]{
+                            snake_dir = [0,-1];
+                        }
                     },
                     KeyCode::Right | KeyCode::Char('d') => {
-                        snake_dir = [0,1];
+                        if snake_dir!=[0,-1]{
+                            snake_dir = [0,1];
+                        }
                     },
                     KeyCode::Up | KeyCode::Char('w') => {
-                        snake_dir = [-1,0];
+                        if snake_dir!=[1,0]{
+                            snake_dir = [-1,0];
+                        }
                     },
                     KeyCode::Down | KeyCode::Char('s') => {
-                        snake_dir = [1,0];
+                        if snake_dir != [-1,0]{
+                            snake_dir = [1,0];
+                        }
                     },
                     _ => {}
                 }
