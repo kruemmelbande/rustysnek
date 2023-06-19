@@ -1,6 +1,7 @@
 use rand::Rng;
 use std::io::Write;
 use std::io::{stdout};
+use std::process::exit;
 use crossterm::event::{self, Event, KeyCode};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
@@ -116,29 +117,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             death_screen(score);
         }
 
-       
+        //check if we have won
+        let mut is_won:bool=false;
+        for row in board{
+            for block in row{
+                if block==0{
+                    is_won=false;
+                    break;
+                }
+            }
+            if is_won==false{
+                break;
+            }
+        }
+        if is_won{
+            std::thread::sleep(std::time::Duration::from_millis(1000));
+            println!();
+            println!("Youre win!");
+            exit(0);
+        }
         
         //Check for food
         if snake_pos[0] as i32 == food_pos[0] as i32 && snake_pos[1] as i32 == food_pos[1] as i32{
             snake_len += 1;
             score += 1;
             food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
-            let mut i:usize = 0;
-            let mut is_win:bool = false;
             while board[food_pos[0]][food_pos[1]] != 0{
-                if i > 10000{
-                    std::thread::sleep(std::time::Duration::from_millis(1000));
-                    println!();
-                    println!("Youre win!");
-                    is_win = true;
-                    break;
-                }
-            
-                i+=1;
                 food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
-            }
-            if is_win{
-                break;
             }
             board[food_pos[0]][food_pos[1]] = -1;
         }
@@ -190,7 +195,7 @@ fn cursor_to_top(){
 fn death_screen(score:usize){
     std::thread::sleep(std::time::Duration::from_millis(1000));
     clear_screen();
-    println!("You died!");
+    println!("You died.");
     println!("Final score: {}", score);
     std::process::exit(0);
 }
