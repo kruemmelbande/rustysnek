@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let head_char:&str = "<>";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
-    let time_between_frames:u64 = 1500; //in ms
+    let time_between_frames:u64 = 200; //in ms
     let wall_collision_enabled:bool = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let mut snake_len:i32 = start_size;
     let mut food_pos:[usize;2];
     let mut inbuff:[i8;4] = [0;4];
-    let mut buff_pos:usize = 0;
+    let mut buff_pos:usize = 1;
     let mut exiter:bool=false;
     let mut stdout = stdout();
     let mut rng = rand::thread_rng();
@@ -73,50 +73,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                             exiter=true;
                         },
                         KeyCode::Left | KeyCode::Char('a')  => {
-                            is_duplicate=false;
-                            if buff_pos!=0{
-                                if inbuff[buff_pos-1]==1{
-                                    is_duplicate=true;
+                            //move the list to the right
+                            if inbuff[0]!=1{
+                                for i in 0..3{
+                                    inbuff[i+1]=inbuff[i];
                                 }
-                            }
-                            if !is_duplicate{
-                                inbuff[buff_pos]=1;
+                                
+                                inbuff[0]=1;
                                 buff_pos+=1;
                             }
                         },
                         KeyCode::Right | KeyCode::Char('d') => {
-                            is_duplicate=false;
-                            if buff_pos!=0{
-                                if inbuff[buff_pos-1]==2{
-                                    is_duplicate=true;
+                            if inbuff[0]!=2{
+                                for i in 0..3{
+                                    inbuff[i+1]=inbuff[i];
                                 }
-                            }
-                            if !is_duplicate{
-                                inbuff[buff_pos]=2;
+                                
+                                inbuff[0]=2;
                                 buff_pos+=1;
                             }
                         },
                         KeyCode::Up | KeyCode::Char('w') => {
-                            is_duplicate=false;
-                            if buff_pos!=0{
-                                if inbuff[buff_pos-1]==3{
-                                    is_duplicate=true;
+                            if inbuff[0]!=3{
+                                for i in 0..3{
+                                    inbuff[i+1]=inbuff[i];
                                 }
-                            }
-                            if !is_duplicate{
-                                inbuff[buff_pos]=3;
+                                
+                                inbuff[0]=3;
                                 buff_pos+=1;
                             }
                         },
                         KeyCode::Down | KeyCode::Char('s') => {
-                            is_duplicate=false;
-                            if buff_pos!=0{
-                                if inbuff[buff_pos-1]==4{
-                                    is_duplicate=true;
+                            if inbuff[0]!=4{
+                                for i in 0..3{
+                                    inbuff[i+1]=inbuff[i];
                                 }
-                            }
-                            if !is_duplicate{
-                                inbuff[buff_pos]=4;
+                                
+                                inbuff[0]=4;
                                 buff_pos+=1;
                             }
                         },
@@ -133,7 +126,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
         if exiter{
             break;
         }
-        match inbuff[buff_pos]{
+        match inbuff[buff_pos-1]{
             1 => {
                 if snake_dir!=[0,1]{
                     snake_dir = [0,-1];
@@ -156,8 +149,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             },
             _ => {}
         }
-        //inbuff[buff_pos]=0;
-        if buff_pos!=0{
+        inbuff[buff_pos]=0;
+        if buff_pos>1{
             buff_pos-=1;
         }
         /*
