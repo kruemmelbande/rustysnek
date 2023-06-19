@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let head_char:&str = "<>";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
-    let time_between_frames:u64 = 200; //in ms
+    let time_between_frames:u64 = 100; //in ms
     let wall_collision_enabled:bool = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -64,8 +64,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
         //input buffer
         std::thread::sleep(std::time::Duration::from_millis(time_between_frames));
         
-        for _ in 0..3{
-            if event::poll(std::time::Duration::from_millis(1))? {
+        for _ in 0..10{
+            if event::poll(std::time::Duration::from_micros(1))? {
                 if let Event::Key(key_event) = event::read()? {
                     match key_event.code {
                         KeyCode::Char('q') | KeyCode::Esc  => {
