@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let head_char:&str = "<>";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
-    let time_between_frames:u64 = 150; //in ms
+    let time_between_frames:u64 = 1500; //in ms
     let wall_collision_enabled:bool = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -38,9 +38,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let mut snake_dir:[i32;2] = [0,1];
     let mut snake_len:i32 = start_size;
     let mut food_pos:[usize;2];
+    let mut inbuff:[i8;4] = [0;4];
+    let mut buff_pos:usize = 0;
+    let mut exiter:bool=false;
     let mut stdout = stdout();
     let mut rng = rand::thread_rng();
     let mut score:usize = 0;
+    let mut is_duplicate:bool;
     draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char, &head_char,&snake_len);
     food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
     board[food_pos[0]][food_pos[1]] = -1;
@@ -54,11 +58,109 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             }
         }*/
         draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char,&head_char,&snake_len);
-        print!("Score: {}", score);
+        print!("Score: {} {} {} {} {}", score, buff_pos, inbuff[0], inbuff[1], inbuff[2]);
         stdout.flush()?;
         enable_raw_mode().ok();
         //wait
+        //input buffer
         std::thread::sleep(std::time::Duration::from_millis(time_between_frames));
+        
+        for _ in 0..3{
+            if event::poll(std::time::Duration::from_millis(1))? {
+                if let Event::Key(key_event) = event::read()? {
+                    match key_event.code {
+                        KeyCode::Char('q') | KeyCode::Esc  => {
+                            exiter=true;
+                        },
+                        KeyCode::Left | KeyCode::Char('a')  => {
+                            is_duplicate=false;
+                            if buff_pos!=0{
+                                if inbuff[buff_pos-1]==1{
+                                    is_duplicate=true;
+                                }
+                            }
+                            if !is_duplicate{
+                                inbuff[buff_pos]=1;
+                                buff_pos+=1;
+                            }
+                        },
+                        KeyCode::Right | KeyCode::Char('d') => {
+                            is_duplicate=false;
+                            if buff_pos!=0{
+                                if inbuff[buff_pos-1]==2{
+                                    is_duplicate=true;
+                                }
+                            }
+                            if !is_duplicate{
+                                inbuff[buff_pos]=2;
+                                buff_pos+=1;
+                            }
+                        },
+                        KeyCode::Up | KeyCode::Char('w') => {
+                            is_duplicate=false;
+                            if buff_pos!=0{
+                                if inbuff[buff_pos-1]==3{
+                                    is_duplicate=true;
+                                }
+                            }
+                            if !is_duplicate{
+                                inbuff[buff_pos]=3;
+                                buff_pos+=1;
+                            }
+                        },
+                        KeyCode::Down | KeyCode::Char('s') => {
+                            is_duplicate=false;
+                            if buff_pos!=0{
+                                if inbuff[buff_pos-1]==4{
+                                    is_duplicate=true;
+                                }
+                            }
+                            if !is_duplicate{
+                                inbuff[buff_pos]=4;
+                                buff_pos+=1;
+                            }
+                        },
+                        _ => {}
+                    }
+                    if buff_pos>3{
+                        buff_pos=3;
+                    }
+                }
+            }
+        }
+
+        disable_raw_mode().ok();
+        if exiter{
+            break;
+        }
+        match inbuff[buff_pos]{
+            1 => {
+                if snake_dir!=[0,1]{
+                    snake_dir = [0,-1];
+                }
+            },
+            2 => {
+                if snake_dir!=[0,-1]{
+                    snake_dir = [0,1];
+                }
+            },
+            3 => {
+                if snake_dir!=[1,0]{
+                    snake_dir = [-1,0];
+                }
+            },
+            4 => {
+                if snake_dir!=[-1,0]{
+                    snake_dir = [1,0];
+                }
+            },
+            _ => {}
+        }
+        //inbuff[buff_pos]=0;
+        if buff_pos!=0{
+            buff_pos-=1;
+        }
+        /*
         if event::poll(std::time::Duration::from_millis(1))? {
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
@@ -90,7 +192,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                 }
             }
         }
-        disable_raw_mode().ok();
+         */
         //Move snake
         snake_pos[0] = (snake_pos[0] as i32 + snake_dir[0]) as i32;
         snake_pos[1] = (snake_pos[1] as i32 + snake_dir[1]) as i32;
