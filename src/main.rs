@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let snake_char:&str = "[]";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
-    let time_between_frames:u64 = 200; //in ms
+    let time_between_frames:u64 = 100; //in ms
     let wall_collision_enabled:bool = true; //If false, the snake will wrap around if it hits a wall
     
 
@@ -64,16 +64,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                         disable_raw_mode().ok();
                         break;
                     },
-                    KeyCode::Left => {
+                    KeyCode::Left | KeyCode::Char('a')  => {
                         snake_dir = [0,-1];
                     },
-                    KeyCode::Right => {
+                    KeyCode::Right | KeyCode::Char('d') => {
                         snake_dir = [0,1];
                     },
-                    KeyCode::Up => {
+                    KeyCode::Up | KeyCode::Char('w') => {
                         snake_dir = [-1,0];
                     },
-                    KeyCode::Down => {
+                    KeyCode::Down | KeyCode::Char('s') => {
                         snake_dir = [1,0];
                     },
                     _ => {}
