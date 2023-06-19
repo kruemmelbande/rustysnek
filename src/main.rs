@@ -13,6 +13,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let start_size:i32= 3;
     let wall_char:&str = "##";
     let snake_char:&str = "[]";
+    let head_char:&str = "<>";
     let food_char:&str = "()";
     let empty_char:&str = "  ";
     let time_between_frames:u64 = 100; //in ms
@@ -32,7 +33,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     */
     
     let mut board:[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]] = [[0;BOARD_SIZE[0]];BOARD_SIZE[1]];
-    draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
     let mut snake_pos:[i32;2] = [(board.len()/2) as i32, (board[0].len()/2) as i32];
     let mut snake_dir:[i32;2] = [0,1];
     let mut snake_len:i32 = start_size;
@@ -40,6 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let mut stdout = stdout();
     let mut rng = rand::thread_rng();
     let mut score:usize = 0;
+    draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char, &head_char,&snake_len);
     food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
     board[food_pos[0]][food_pos[1]] = -1;
     clear_screen();
@@ -51,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             if let Event::Key(_) = event::read()? {
             }
         }*/
-        draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char);
+        draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char,&head_char,&snake_len);
         print!("Score: {}", score);
         stdout.flush()?;
         enable_raw_mode().ok();
@@ -146,7 +147,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     }Ok(())
 
 }
-fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snake_char: &str, food_char: &str, empty_char: &str){
+fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snake_char: &str, food_char: &str, empty_char: &str, head_char:&str,snake_length:&i32){
     //Draws the board to the console
     
 
@@ -156,11 +157,13 @@ fn draw_board(board: &[[i32;BOARD_SIZE[0]];BOARD_SIZE[1]], wall_char: &str, snak
     for row in board.iter(){
         print!("{}", wall_char);
         for block in row.iter(){
-            match block{
+            match block {
                 0 => print!("{}", empty_char),
                 -1 => print!("{}", food_char),
+                x if x == snake_length => print!("{}", head_char),
                 _ => print!("{}", snake_char),
             }
+            
         }
         print!("{}", wall_char);
         println!();
