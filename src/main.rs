@@ -44,7 +44,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
     let mut stdout = stdout();
     let mut rng = rand::thread_rng();
     let mut score:usize = 0;
-    let mut is_duplicate:bool;
     draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char, &head_char,&snake_len);
     food_pos = [rng.gen_range(0..board.len()), rng.gen_range(0..board[0].len())];
     board[food_pos[0]][food_pos[1]] = -1;
@@ -58,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             }
         }*/
         draw_board(&board, &wall_char, &snake_char, &food_char, &empty_char,&head_char,&snake_len);
-        print!("Score: {} {} {} {} {}", score, buff_pos, inbuff[0], inbuff[1], inbuff[2]);
+        print!("Score: {}    ",score);
         stdout.flush()?;
         enable_raw_mode().ok();
         //wait
@@ -80,7 +79,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                                 }
                                 
                                 inbuff[0]=1;
-                                buff_pos+=1;
+                                
+                                if inbuff[1]!=0{
+                                    buff_pos+=1;
+                                }  
                             }
                         },
                         KeyCode::Right | KeyCode::Char('d') => {
@@ -90,7 +92,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                                 }
                                 
                                 inbuff[0]=2;
-                                buff_pos+=1;
+                                
+                                if inbuff[1]!=0{
+                                    buff_pos+=1;
+                                }  
                             }
                         },
                         KeyCode::Up | KeyCode::Char('w') => {
@@ -100,7 +105,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                                 }
                                 
                                 inbuff[0]=3;
-                                buff_pos+=1;
+                                
+                                if inbuff[1]!=0{
+                                    buff_pos+=1;
+                                }  
                             }
                         },
                         KeyCode::Down | KeyCode::Char('s') => {
@@ -110,7 +118,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
                                 }
                                 
                                 inbuff[0]=4;
-                                buff_pos+=1;
+                                if inbuff[1]!=0{
+                                    buff_pos+=1;
+                                }  
                             }
                         },
                         _ => {}
@@ -126,7 +136,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
         if exiter{
             break;
         }
-        match inbuff[buff_pos-1]{
+        match inbuff[buff_pos]{
             1 => {
                 if snake_dir!=[0,1]{
                     snake_dir = [0,-1];
@@ -150,42 +160,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>  {
             _ => {}
         }
         inbuff[buff_pos]=0;
-        if buff_pos>1{
+        if buff_pos>0{
             buff_pos-=1;
         }
-        /*
-        if event::poll(std::time::Duration::from_millis(1))? {
-            if let Event::Key(key_event) = event::read()? {
-                match key_event.code {
-                    KeyCode::Char('q') | KeyCode::Esc  => {
-                        disable_raw_mode().ok();
-                        break;
-                    },
-                    KeyCode::Left | KeyCode::Char('a')  => {
-                        if snake_dir!=[0,1]{
-                            snake_dir = [0,-1];
-                        }
-                    },
-                    KeyCode::Right | KeyCode::Char('d') => {
-                        if snake_dir!=[0,-1]{
-                            snake_dir = [0,1];
-                        }
-                    },
-                    KeyCode::Up | KeyCode::Char('w') => {
-                        if snake_dir!=[1,0]{
-                            snake_dir = [-1,0];
-                        }
-                    },
-                    KeyCode::Down | KeyCode::Char('s') => {
-                        if snake_dir != [-1,0]{
-                            snake_dir = [1,0];
-                        }
-                    },
-                    _ => {}
-                }
-            }
-        }
-         */
+
         //Move snake
         snake_pos[0] = (snake_pos[0] as i32 + snake_dir[0]) as i32;
         snake_pos[1] = (snake_pos[1] as i32 + snake_dir[1]) as i32;
